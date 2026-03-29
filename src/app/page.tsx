@@ -1,65 +1,165 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { jurisdictions, getJurisdictionsByTier } from "@/lib/data/jurisdictions";
+import { Shield, TrendingUp, Bell, Search, ChevronRight, AlertTriangle } from "lucide-react";
 
-export default function Home() {
+const tierLabels: Record<number, { label: string; color: string }> = {
+  1: { label: "Tier 1 — Premium", color: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
+  2: { label: "Tier 2 — Established", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
+  3: { label: "Tier 3 — Emerging", color: "bg-slate-500/10 text-slate-400 border-slate-500/20" },
+};
+
+const statusBadge: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  active: { label: "Active", variant: "outline" },
+  monitoring: { label: "Monitoring", variant: "secondary" },
+  contested: { label: "Contested", variant: "destructive" },
+};
+
+export default function HomePage() {
+  const tier1 = getJurisdictionsByTier(1);
+  const tier2 = getJurisdictionsByTier(2);
+  const tier3 = getJurisdictionsByTier(3);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen">
+      {/* Hero */}
+      <section className="border-b border-border/40 bg-gradient-to-b from-background to-muted/20">
+        <div className="container max-w-screen-xl mx-auto px-4 py-20">
+          <div className="max-w-3xl">
+            <Badge variant="outline" className="mb-4 text-xs">
+              Built by Dootech · Isle of Man Licensing Specialists
+            </Badge>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">
+              iGaming Regulatory
+              <span className="text-primary"> Intelligence Hub</span>
+            </h1>
+            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+              Live licence registers, enforcement tracker, AI-powered compliance helper, and PEP/sanctions screening — across every major gambling jurisdiction.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/jurisdictions"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Explore Jurisdictions <ChevronRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/compliance"
+                className="inline-flex items-center gap-2 rounded-md border border-border px-6 py-3 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Compliance Helper
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Stats bar */}
+      <section className="border-b border-border/40 bg-muted/30">
+        <div className="container max-w-screen-xl mx-auto px-4 py-4">
+          <div className="flex flex-wrap gap-8 text-sm text-muted-foreground">
+            <span><strong className="text-foreground">{jurisdictions.length}</strong> jurisdictions tracked</span>
+            <span><strong className="text-foreground">3</strong> regulatory tiers</span>
+            <span><strong className="text-foreground">Live</strong> enforcement data</span>
+            <span><strong className="text-foreground">AI-powered</strong> compliance Q&A</span>
+            <span><strong className="text-foreground">PEP / Sanctions</strong> screening</span>
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* Features */}
+      <section className="container max-w-screen-xl mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="border-border/60">
+            <CardHeader className="pb-2">
+              <Shield className="h-8 w-8 text-primary mb-2" />
+              <CardTitle className="text-base">Live Licence Registers</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Scraped nightly from official regulator sources. Search any operator across all jurisdictions.
+            </CardContent>
+          </Card>
+          <Card className="border-border/60">
+            <CardHeader className="pb-2">
+              <TrendingUp className="h-8 w-8 text-primary mb-2" />
+              <CardTitle className="text-base">Enforcement Tracker</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Every fine, revocation, suspension, and warning across all regulators in one searchable feed.
+            </CardContent>
+          </Card>
+          <Card className="border-border/60">
+            <CardHeader className="pb-2">
+              <Bell className="h-8 w-8 text-primary mb-2" />
+              <CardTitle className="text-base">Recent Changes</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Real-time alerts when licences are granted, surrendered, revoked, or suspended. Global or per-jurisdiction.
+            </CardContent>
+          </Card>
+          <Card className="border-border/60">
+            <CardHeader className="pb-2">
+              <Search className="h-8 w-8 text-primary mb-2" />
+              <CardTitle className="text-base">Compliance Helper</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Ask plain-English questions about any jurisdiction&apos;s regulations. Cited answers from primary legislation.
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Jurisdictions */}
+      <section className="container max-w-screen-xl mx-auto px-4 pb-20">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold">Jurisdictions</h2>
+          <Link href="/jurisdictions" className="text-sm text-primary hover:underline flex items-center gap-1">
+            View all <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {[{ tier: 1, items: tier1 }, { tier: 2, items: tier2 }, { tier: 3, items: tier3 }].map(({ tier, items }) => (
+          <div key={tier} className="mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${tierLabels[tier].color}`}>
+                {tierLabels[tier].label}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {items.map((j) => (
+                <Link key={j.slug} href={`/jurisdictions/${j.slug}`}>
+                  <Card className="border-border/60 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer h-full">
+                    <CardContent className="pt-4">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{j.flagEmoji}</span>
+                          <div>
+                            <div className="font-medium text-sm">{j.name}</div>
+                            <div className="text-xs text-muted-foreground">{j.regulatorAbbr}</div>
+                          </div>
+                        </div>
+                        {j.status !== "active" && (
+                          <Badge variant={statusBadge[j.status].variant} className="text-xs shrink-0">
+                            {j.status === "contested" && <AlertTriangle className="h-3 w-3 mr-1" />}
+                            {statusBadge[j.status].label}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{j.tagline}</p>
+                      <div className="mt-3 flex gap-4 text-xs text-muted-foreground">
+                        <span>{j.annualFee}</span>
+                        <span>·</span>
+                        <span>{j.processingTime}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
     </div>
   );
 }

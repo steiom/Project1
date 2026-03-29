@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Jurisdiction {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  regulator       String
+  regulatorAbbr   String
+  tier            Int      // 1=Premium, 2=Established, 3=Emerging
+  country         String
+  region          String
+  flagEmoji       String
+  status          String   @default("active") // active | contested | defunct
+  description     String   @db.Text
+  overview        String   @db.Text
+
+  // Costs
+  applicationFee  String?
+  annualFee       String?
+  feeNotes        String?  @db.Text
+
+  // Timeline
+  processingTime  String?
+  licenceValidity String?
+
+  // Requirements
+  requirements    String[] // array of requirement strings
+  restrictedMarkets String[]
+
+  // Links
+  regulatorUrl    String?
+  licenceRegisterUrl String?
+
+  // Meta
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  licences        Licence[]
+  enforcementActions EnforcementAction[]
+  changes         RecentChange[]
+}
+
+model Licence {
+  id              String   @id @default(cuid())
+  jurisdictionId  String
+  jurisdiction    Jurisdiction @relation(fields: [jurisdictionId], references: [id])
+
+  licenceNumber   String?
+  operatorName    String
+  operatorSlug    String
+  licenceType     String   // operator | b2b | software | combined
+  status          LicenceStatus @default(ACTIVE)
+
+  issuedDate      DateTime?
+  expiryDate      DateTime?
+  surrenderedDate DateTime?
+  revokedDate     DateTime?
+
+  authorisedDomains String[]
+  notes           String?  @db.Text
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  changes         RecentChange[]
+
+  @@index([operatorSlug])
+  @@index([jurisdictionId])
+}
+
+enum LicenceStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  SURRENDERED
+  EXPIRED
+  PENDING
+}
+
+model EnforcementAction {
+  id              String   @id @default(cuid())
+  jurisdictionId  String
+  jurisdiction    Jurisdiction @relation(fields: [jurisdictionId], references: [id])
+
+  operatorName    String
+  actionType      String   // fine | revocation | suspension | warning | condition | cease-desist
+  description     String   @db.Text
+  penalty         String?  // e.g. "£2.1m"
+  penaltyAmount   Float?   // numeric for sorting/filtering
+  currency        String?
+
+  actionDate      DateTime
+  publishedDate   DateTime?
+  sourceUrl       String?
+
+  breachTypes     String[] // AML | social-responsibility | advertising | technical | other
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([jurisdictionId])
+  @@index([actionDate])
+}
+
+model RecentChange {
+  id              String   @id @default(cuid())
+  jurisdictionId  String
+  jurisdiction    Jurisdiction @relation(fields: [jurisdictionId], references: [id])
+  licenceId       String?
+  licence         Licence? @relation(fields: [licenceId], references: [id])
+
+  changeType      ChangeType
+  operatorName    String?
+  description     String
+  detail          String?  @db.Text
+
+  occurredAt      DateTime
+  sourceUrl       String?
+
+  createdAt       DateTime @default(now())
+
+  @@index([jurisdictionId])
+  @@index([occurredAt])
+}
+
+enum ChangeType {
+  LICENCE_GRANTED
+  LICENCE_SURRENDERED
+  LICENCE_REVOKED
+  LICENCE_SUSPENDED
+  LICENCE_REINSTATED
+  LICENCE_EXPIRED
+  ENFORCEMENT_ACTION
+  CONDITION_CHANGE
+  DOMAIN_ADDED
+  DOMAIN_REMOVED
+  KEY_PERSON_CHANGE
+  REGULATION_UPDATE
+}
+
+model ServiceProvider {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  category        String   // law-firm | compliance | testing-lab | kyc-aml | corporate | accounting | platform
+  description     String   @db.Text
+  website         String?
+  email           String?
+
+  jurisdictions   String[] // jurisdiction slugs they cover
+  specialisms     String[] // free-text tags
+
+  featured        Boolean  @default(false)
+  verified        Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
